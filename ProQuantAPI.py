@@ -112,11 +112,12 @@ class ProQuant:
         if "Entry/exit rules hidden by owner" in self.browser.driver.page_source:
             return False
 
-        strategy_name = 'TBD'
-        strategy_market = 'TBD'
+        strategy_header = self.browser.driver.find_element_by_css_selector("[class=\"css-1dbjc4n r-1awozwy r-1pz39u2 r-14lw9ot r-1777fci r-d9fdf6 r-tvv088\"]")
+        strategy_friendly_name = strategy_header.text.split('\n')[1]
+        strategy_market = strategy_header.text.split('\n')[0]
         conditional_desc = self.browser.driver.find_element_by_css_selector("[class=\"css-901oao r-1niwhzg r-80ss5y r-98loyc r-1b43r93 r-16dba41 r-10yl4k\"]").text
 
-        strategy_rules = {'name': strategy_name,'market': strategy_market}
+        strategy_rules = {'friendly_name': strategy_friendly_name,'market': strategy_market}
         strategy_rules['conditional_statement'] = conditional_desc
 
         long_indicator_button = self.browser.driver.find_elements_by_css_selector("[aria-label=\"label.long\"]")
