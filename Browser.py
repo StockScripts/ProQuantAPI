@@ -9,12 +9,13 @@ from selenium.webdriver.chrome.options import Options
 
 class Browser:
 
-    def __init__(self,enable_headless_mode=True):
+    def __init__(self,enable_headless_mode=True,headless_resolution=(1920,1080)):
         self.enable_headless_mode = enable_headless_mode
         chrome_options = Options()
 
         if enable_headless_mode:
             chrome_options.add_argument("--headless")
+            chrome_options.add_argument(f"--window-size={headless_resolution[0]},{headless_resolution[1]}")
 
         self.driver = webdriver.Chrome(options=chrome_options)
 
@@ -30,6 +31,9 @@ class Browser:
         :return: Boolean on if the driver object is initalized
         """
         return len(self.driver.find_elements_by_id("...")) != 0
+
+    def extract_text_from_element(self,selenium_element):
+        return selenium_element.text
 
     def wait_for_page_load(self,keywordToFind):
         """
@@ -72,7 +76,7 @@ class Browser:
         :param path: path to save screenshot image
         :param waitFuncArg: argument to waitFunc
         """
-        def waitForPageLoad(driver,keywordToFind):
+        def wait_for_page_load(driver,keywordToFind):
             if waitFuncArg is None:
                 time.sleep(3)
             else:
@@ -88,7 +92,7 @@ class Browser:
         driver = webdriver.Chrome(options=chrome_options)
         driver.get(url)
 
-        waitForPageLoad(driver,waitFuncArg)
+        wait_for_page_load(driver,waitFuncArg)
 
         # get scrollHeight
         height = driver.execute_script(
@@ -104,7 +108,7 @@ class Browser:
 
         driver.get(url)
 
-        waitForPageLoad(driver,waitFuncArg)
+        wait_for_page_load(driver,waitFuncArg)
 
         # save screenshot to file path
         driver.save_screenshot(path)
