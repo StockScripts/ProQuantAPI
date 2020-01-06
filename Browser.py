@@ -7,9 +7,10 @@ import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
+
 class Browser:
 
-    def __init__(self,enable_headless_mode=True,headless_resolution=(1920,1080)):
+    def __init__(self, enable_headless_mode=True, headless_resolution=(1920, 1080)):
         self.enable_headless_mode = enable_headless_mode
         chrome_options = Options()
 
@@ -19,8 +20,8 @@ class Browser:
 
         self.driver = webdriver.Chrome(options=chrome_options)
 
-    def write_page_source(self,path):
-        f = open(path,'w')
+    def write_page_source(self, path):
+        f = open(path, 'w')
         f.write(self.driver.page_source)
         f.close()
 
@@ -32,21 +33,21 @@ class Browser:
         """
         return len(self.driver.find_elements_by_id("...")) != 0
 
-    def extract_text_from_element(self,selenium_element):
+    def extract_text_from_element(self, selenium_element):
         return selenium_element.text
 
-    def wait_for_page_load(self,keywordToFind):
+    def wait_for_page_load(self, keyword_to_find):
         """
         Returns when page source is fully loaded based on finding a keyword
 
         :param: keywordToFind: needle to find in page source to signify page fully loaded
         """
         while True:
-            if keywordToFind in self.driver.page_source:
+            if keyword_to_find in self.driver.page_source:
                 break
             time.sleep(0.3)
 
-    def load_cookies(self,cookie_content):
+    def load_cookies(self, cookie_content):
         """
         Loads cookie data into Selenium WebDriver object (browser)
 
@@ -57,7 +58,6 @@ class Browser:
         for cookie in cookies:
             self.driver.add_cookie(cookie)
 
-
     def dump_cookies(self):
         """
         Dumps all cookie content from browser
@@ -66,7 +66,7 @@ class Browser:
         cookie_content = pickle.dumps(self.driver.get_cookies())
         return cookie_content
 
-    def take_full_page_screenshot(self,url,path,waitFuncArg=None):
+    def take_full_page_screenshot(self, url, path, wait_func_arg=None):
         """
         Source: https://stackoverflow.com/questions/51653344/taking-screenshot-of-whole-page-with-python-selenium-and-firefox-or-chrome-headl
 
@@ -74,10 +74,10 @@ class Browser:
 
         :param url: string, url of the page you want a full screenshot of
         :param path: path to save screenshot image
-        :param waitFuncArg: argument to waitFunc
+        :param wait_func_arg: argument to waitFunc
         """
         def wait_for_page_load(driver,keywordToFind):
-            if waitFuncArg is None:
+            if wait_func_arg is None:
                 time.sleep(3)
             else:
                 while True:
@@ -92,7 +92,7 @@ class Browser:
         driver = webdriver.Chrome(options=chrome_options)
         driver.get(url)
 
-        wait_for_page_load(driver,waitFuncArg)
+        wait_for_page_load(driver, wait_func_arg)
 
         # get scrollHeight
         height = driver.execute_script(
@@ -108,7 +108,7 @@ class Browser:
 
         driver.get(url)
 
-        wait_for_page_load(driver,waitFuncArg)
+        wait_for_page_load(driver, wait_func_arg)
 
         # save screenshot to file path
         driver.save_screenshot(path)

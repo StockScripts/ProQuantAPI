@@ -9,11 +9,11 @@ import time
 proquant_url = "https://app.proquant.com"
 
 class ProQuant:
-    def __init__(self,enable_headless_mode = True,headless_resolution = (1920,1080)):
+    def __init__(self, enable_headless_mode=True, headless_resolution=(1920,1080)):
         self.browser = Browser(enable_headless_mode=enable_headless_mode,headless_resolution=headless_resolution)
-        self.loggedIn = False
+        self.logged_in = False
 
-    def login(self,username, password):
+    def login(self, username, password):
         """
 
         :param username: string, username of ProQuant account
@@ -47,7 +47,7 @@ class ProQuant:
         if True in errors:
             return False
         else:
-            self.loggedIn = True
+            self.logged_in = True
             return True
 
     def __parse_strategy_page(self):
@@ -170,7 +170,7 @@ class ProQuant:
             strategy_info['rules'].update(short_entry_rules)
             strategy_info['rules'].update(short_exit_rules)
         #endregion
-        return strategy_info# #T
+        return strategy_info
 
     def __parse_strategy_page_positions(self):
         def format_position(raw_position):
@@ -206,8 +206,8 @@ class ProQuant:
 
         return positions
 
-    def get_strategies(self,returnIndex = False):
-        if not self.loggedIn:
+    def get_strategies(self, return_index=False):
+        if not self.logged_in:
             return False
 
         self.browser.driver.get(proquant_url)
@@ -219,10 +219,10 @@ class ProQuant:
             element = all_strategies_result[i]
             try:
                 strategy = {
-                    'market':element.text.split('\n')[0],
-                    'friendly_name':element.text.split('\n')[1]
+                    'market': element.text.split('\n')[0],
+                    'friendly_name': element.text.split('\n')[1]
                 }
-                if returnIndex:
+                if return_index:
                     strategy['index']= i
 
                 all_strategies.append(strategy)
@@ -231,13 +231,11 @@ class ProQuant:
 
         return all_strategies
 
-
     def go_to_positions(self):
         self.browser.wait_for_page_load("Positions")
         time.sleep(1)  # wait for positions button to load
 
-        basic_info = self.browser.driver.find_elements_by_css_selector(
-            "[class=\"css-1dbjc4n r-1awozwy r-14lw9ot r-1loqt21 r-18u37iz r-1k9zyfm r-d9fdf6 r-1otgn73 r-eafdt9 r-1i6wzkk r-lrvibr\"]")
+        basic_info = self.browser.driver.find_elements_by_css_selector("[class=\"css-1dbjc4n r-1awozwy r-14lw9ot r-1loqt21 r-18u37iz r-1k9zyfm r-d9fdf6 r-1otgn73 r-eafdt9 r-1i6wzkk r-lrvibr\"]")
         for i in range(0, len(basic_info)):
             info_piece = basic_info[i]
             info_piece = info_piece.text.split('\n')
@@ -249,8 +247,8 @@ class ProQuant:
                 else:
                     return False
 
-    def go_to_strategy_by_name(self,strategy_market,strategy_friendly_name):
-        if not self.loggedIn:
+    def go_to_strategy_by_name(self, strategy_market, strategy_friendly_name):
+        if not self.logged_in:
             return False
 
         all_strategies = self.get_strategies(True)
@@ -268,14 +266,14 @@ class ProQuant:
         else:
             return False
 
-    def get_positions_by_link(self,link):
+    def get_positions_by_link(self, link):
         self.browser.driver.get(link)
         if not self.go_to_positions():
             return False
         else:
             return self.__parse_strategy_page_positions()
 
-    def get_positions_by_name(self,strategy_market,strategy_friendly_name):
+    def get_positions_by_name(self, strategy_market, strategy_friendly_name):
         if not self.go_to_strategy_by_name(strategy_market, strategy_friendly_name):
             return False
         elif not self.go_to_positions():
@@ -283,7 +281,7 @@ class ProQuant:
         else:
             return self.__parse_strategy_page_positions()
 
-    def get_strategy_by_link(self,link):
+    def get_strategy_by_link(self, link):
         """Get strategy info by link
         e.x. https://app.proquant.com/shared/strategy/3a0669e4-2c56-4c11-bf4e-50a13efa5979
         """
@@ -292,87 +290,11 @@ class ProQuant:
 
         return self.__parse_strategy_page()
 
-    def get_strategy_by_name(self,strategy_market,strategy_friendly_name):
-        if not self.go_to_strategy_by_name(strategy_market,strategy_friendly_name):
+    def get_strategy_by_name(self, strategy_market, strategy_friendly_name):
+        if not self.go_to_strategy_by_name(strategy_market, strategy_friendly_name):
             return False
         else:
             return self.__parse_strategy_page()
-
-        '''
-        def waitForPageLoad(driver,keywordToFind):
-            while True:
-                if keywordToFind in driver.page_source:
-                    break
-                    
-        allCSS = self.browser.driver.find_elements_by_class_name('css-901oao')
-        i=0
-        # element.text
-        # Long - long button - Start
-        # Short - short button
-        # Long entry - long entry text
-        # +1 - conditional
-        # +1 - First Condition
-        # +3 - second condition
-        # +3 - Long exit to signify conditional end
-        # +1 - conditional
-        # +1 - First Conditional
-        # +3 - blank text signifies end
-        
-        longConditions = {}
-        longEntryIndex = 0
-        longExitIndex = 0
-        longEndIndex = 0
-        longExitFound = True
-
-        for element in allCSS:
-            #print(i)
-            print(element.text)
-            print("=======")
-
-            if element.text == "Long entry":
-                longEntryIndex = i
-            elif element.text == "Long exit":
-                longExitIndex = i
-                longExitFound = True
-
-            if longExitFound and element.text == "":
-                longEndIndex = i
-                longExitFound = False
-                print("LONG EXIT INDEX " + str(longExitIndex))
-            i+=1
-
-        numOfLongConditions = (longExitIndex-(longEntryIndex+2))/3
-        for i in range(longEntryIndex+2, longExitIndex, 3):
-            indicatorName = allCSS[i].text
-            indicatorDesc = allCSS[i+1].text
-            indicatorButton = allCSS[i]
-
-            indicatorButton.click()
-            time.sleep(1)
-
-            actions = ActionChains(self.browser.driver)
-            actions.move_by_offset(50, 50).click().perform()
-
-        for i in range(longExitIndex+2, longEndIndex, 3):
-            indicatorName = allCSS[i].text
-            indicatorDesc = allCSS[i + 1].text
-            indicatorButton = allCSS[i]
-
-            indicatorButton.click()
-            time.sleep(1)
-
-            actions = ActionChains(self.browser.driver)
-            actions.move_by_offset(50, 50).click().perform()
-
-        time.sleep(1)
-        shortButton.click()
-
-        #print(longConditions)
-        #actions = ActionChains(self.browser.driver)
-        #actions.move_to_element(like[130]).perform()
-        #like[130].click()
-        #1 short button
-        '''
 
     def close(self):
         self.browser.driver.close()
